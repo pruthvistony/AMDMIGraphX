@@ -59,7 +59,7 @@ inline auto mi_launch(hipStream_t stream, const hip_shape<N>& s, index_int local
     // assert(std::any_of(nglobal_multi.begin(), nglobal_multi.end(), [](auto x){return x>0;}));
 
     return [=](auto f) {
-        launch(stream, nglobal, local)([=](auto idx) {
+        launch(stream, nglobal, local)([=](auto idx) __device__ {
             auto midx = make_multi_index(s, idx.global, nglobal_multi);
             midx.for_stride(s.lens, [&](auto i) { f(i); });
         });

@@ -59,7 +59,7 @@ struct min
 struct lowest
 {
     template <class T>
-    operator T() const
+    MIGRAPHX_DEVICE_CONSTEXPR operator T() const
     {
         return device_cast(std::numeric_limits<host_type<T>>::lowest());
     }
@@ -68,7 +68,7 @@ struct lowest
 struct highest
 {
     template <class T>
-    operator T() const
+    MIGRAPHX_DEVICE_CONSTEXPR operator T() const
     {
         return device_cast(std::numeric_limits<host_type<T>>::max());
     }
