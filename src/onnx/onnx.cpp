@@ -1421,7 +1421,7 @@ struct onnx_parser
 
     bool parse_model(const onnx::ModelProto& model)
     {
-        if (model.has_graph())
+        if(model.has_graph())
         {
             this->parse_graph(model.graph());
 
