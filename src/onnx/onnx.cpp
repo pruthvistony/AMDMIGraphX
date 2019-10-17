@@ -1419,6 +1419,18 @@ struct onnx_parser
         }
     }
 
+    bool parse_model(const onnx::ModelProto& model)
+    {
+        if (model.has_graph())
+        {
+            this->parse_graph(model.graph());
+
+            return true;
+        }
+
+        return false;
+    }
+
     void parse_graph(const onnx::GraphProto& graph)
     {
         nodes = get_nodes(graph);
@@ -1472,7 +1484,8 @@ struct onnx_parser
                 }
                 else if(input.empty())
                 {
-                    this->parse_undefined(input);
+                    auto input_name = input;
+                    this->parse_undefined(input_name);
                 }
                 args.push_back(instructions.at(input));
             }
