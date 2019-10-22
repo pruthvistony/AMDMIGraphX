@@ -33,6 +33,7 @@ struct onnx_parser
 
     std::unordered_map<std::string, op_func> ops;
     std::unordered_map<std::string, operation> map_actv_funcs;
+    std::vector<std::string> unsupported_nodes;
 
     onnx_parser()
     {
@@ -1419,16 +1420,37 @@ struct onnx_parser
         }
     }
 
-    bool parse_model(const onnx::ModelProto& model)
+    bool parse_model_string(const std::string& model_str)
     {
-        if(model.has_graph())
-        {
-            this->parse_graph(model.graph());
+        onnx::ModelProto model;
+        try {
+            if (model.ParseFromString(model_str))
+            {
+                if(model.has_graph())
+                {
+                    this->parse_graph(model.graph());
 
-            return true;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
+        catch(...)
+        {
+            return false;
+        }
+    }
 
-        return false;
+    std::vector<std::string> get_unsupported_nodes()
+    {
+        return unsupported_nodes;
     }
 
     void parse_graph(const onnx::GraphProto& graph)
@@ -1438,17 +1460,14 @@ struct onnx_parser
         for(auto&& f : graph.initializer())
         {
             initializer_data[f.name()] = f;
+            instructions[f.name()] = prog.add_literal(parse_tensor(f));
         }
+
         for(auto&& input : graph.input())
         {
             const std::string& name = input.name();
             // Does the input have an initializer?
-            if(contains(initializer_data, name))
-            {
-                auto t             = initializer_data[name];
-                instructions[name] = prog.add_literal(parse_tensor(t));
-            }
-            else
+            if(!contains(initializer_data, name))
             {
                 // TODO: Get shape of input parameter
                 shape s            = parse_type(input.type());
@@ -1484,15 +1503,22 @@ struct onnx_parser
                 }
                 else if(input.empty())
                 {
-                    auto input_name = input;
-                    this->parse_undefined(input_name);
+                    this->parse_undefined(input);
                 }
+
+                if (instructions.count(input) == 0)
+                {
+                    unsupported_nodes.push_back(input);
+                    MIGRAPHX_THROW("Node " + input + " is not supported!");
+                }                
+
                 args.push_back(instructions.at(input));
             }
             std::vector<instruction_ref> result;
             if(ops.count(node.op_type()) == 0)
             {
                 result.push_back(prog.add_instruction(op::unknown{node.op_type()}, args));
+                unsupported_nodes.push_back(node.op_type());
             }
             else
             {
@@ -1505,9 +1531,9 @@ struct onnx_parser
             }
             else
             {
-                assert(node.output().size() >= result.size());
+                auto size = std::min<std::size_t>(node.output().size(), result.size());
                 std::transform(result.begin(),
-                               result.end(),
+                               result.begin() + size,
                                node.output().begin(),
                                std::inserter(instructions, instructions.end()),
                                [](auto&& x, auto&& y) { return std::make_pair(y, x); });
@@ -1761,6 +1787,32 @@ program parse_onnx(const std::string& name)
     parser.parse_from(input);
 #endif
     return std::move(parser.prog);
+}
+
+program parse_model(const std::string& model_str, std::vector<std::string>& unsupported_nodes)
+{
+    onnx_parser parser;
+    bool ret = parser.parse_model_string(model_str);
+    if (!ret)
+    {
+        unsupported_nodes = parser.get_unsupported_nodes();
+        return {};
+    }
+    unsupported_nodes.clear();
+
+    return std::move(parser.prog);
+}
+
+std::set<std::string> get_supported_ops()
+{
+    onnx_parser parser;
+    std::set<std::string> ops;
+    for (auto& op : parser.ops)
+    {
+        ops.insert(op.first);
+    }
+
+    return std::move(ops);
 }
 
 } // namespace MIGRAPHX_INLINE_NS
