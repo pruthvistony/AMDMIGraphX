@@ -1423,8 +1423,9 @@ struct onnx_parser
     bool parse_model_string(const std::string& model_str)
     {
         onnx::ModelProto model;
-        try {
-            if (model.ParseFromString(model_str))
+        try
+        {
+            if(model.ParseFromString(model_str))
             {
                 if(model.has_graph())
                 {
@@ -1448,10 +1449,7 @@ struct onnx_parser
         }
     }
 
-    std::vector<std::string> get_unsupported_nodes()
-    {
-        return unsupported_nodes;
-    }
+    std::vector<std::string> get_unsupported_nodes() { return unsupported_nodes; }
 
     void parse_graph(const onnx::GraphProto& graph)
     {
@@ -1460,7 +1458,7 @@ struct onnx_parser
         for(auto&& f : graph.initializer())
         {
             initializer_data[f.name()] = f;
-            instructions[f.name()] = prog.add_literal(parse_tensor(f));
+            instructions[f.name()]     = prog.add_literal(parse_tensor(f));
         }
 
         for(auto&& input : graph.input())
@@ -1506,11 +1504,11 @@ struct onnx_parser
                     this->parse_undefined(input);
                 }
 
-                if (instructions.count(input) == 0)
+                if(instructions.count(input) == 0)
                 {
                     unsupported_nodes.push_back(input);
                     MIGRAPHX_THROW("Node " + input + " is not supported!");
-                }                
+                }
 
                 args.push_back(instructions.at(input));
             }
@@ -1793,7 +1791,7 @@ program parse_model(const std::string& model_str, std::vector<std::string>& unsu
 {
     onnx_parser parser;
     bool ret = parser.parse_model_string(model_str);
-    if (!ret)
+    if(!ret)
     {
         unsupported_nodes = parser.get_unsupported_nodes();
         return {};
@@ -1807,7 +1805,7 @@ std::set<std::string> get_supported_ops()
 {
     onnx_parser parser;
     std::set<std::string> ops;
-    for (auto& op : parser.ops)
+    for(auto& op : parser.ops)
     {
         ops.insert(op.first);
     }
