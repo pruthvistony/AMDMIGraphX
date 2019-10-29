@@ -4,6 +4,7 @@
 #include <migraphx/program.hpp>
 #include <migraphx/config.hpp>
 #include <sstream>
+#include <set>
 
 namespace migraphx {
 inline namespace MIGRAPHX_INLINE_NS {
