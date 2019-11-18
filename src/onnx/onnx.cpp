@@ -1741,6 +1741,10 @@ struct onnx_parser
                            }
                            return d.dim_value();
                        });
+        // if dims is empty, it is a scalar
+        if (dims.empty())
+            return {shape_type};
+            
         return {shape_type, dims};
     }
 
