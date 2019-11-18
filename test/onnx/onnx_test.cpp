@@ -438,9 +438,9 @@ TEST_CASE(gather_test)
 TEST_CASE(gemm_test)
 {
     migraphx::program p;
-    auto l0 = p.add_parameter("0", migraphx::shape{migraphx::shape::float_type, {5, 7}});
-    auto l1 = p.add_parameter("1", migraphx::shape{migraphx::shape::float_type, {11, 5}});
-    auto l2 = p.add_parameter("2", migraphx::shape{migraphx::shape::float_type});
+    auto l0    = p.add_parameter("0", migraphx::shape{migraphx::shape::float_type, {5, 7}});
+    auto l1    = p.add_parameter("1", migraphx::shape{migraphx::shape::float_type, {11, 5}});
+    auto l2    = p.add_parameter("2", migraphx::shape{migraphx::shape::float_type});
     auto t0    = p.add_instruction(migraphx::op::transpose{{1, 0}}, l0);
     auto t1    = p.add_instruction(migraphx::op::transpose{{1, 0}}, l1);
     auto bl2   = p.add_instruction(migraphx::op::multibroadcast{{7, 11}}, l2);
