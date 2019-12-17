@@ -435,9 +435,9 @@ struct onnx_parser
         {
             copy(attributes["kernel_shape"].ints(), op.lengths.begin());
         }
-        
+
         // no padding is needed
-        if (op.padding[0] or op.padding[1])
+        if(op.padding[0] or op.padding[1])
         {
             if(contains(attributes, "auto_pad"))
             {
