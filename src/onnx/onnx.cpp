@@ -437,12 +437,15 @@ struct onnx_parser
             copy(attributes["kernel_shape"].ints(), op.lengths.begin());
         }
 
-        // no padding is needed
-        if(op.padding[0] or op.padding[1])
+        if(contains(attributes, "auto_pad"))
         {
-            if(contains(attributes, "auto_pad"))
+            auto s = attributes["auto_pad"].s();
+            if(s == std::string("NOTSET"))
             {
-                auto s = attributes["auto_pad"].s();
+                op.padding_mode = op::padding_mode_t::default_;
+            }
+            else
+            {
                 if(s.find("SAME_UPPER") == std::string::npos)
                 {
                     MIGRAPHX_THROW("auto_pad only supports SAME_UPPER for pooling");
