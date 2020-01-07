@@ -413,7 +413,7 @@ struct onnx_parser
             if(contains(attributes, "auto_pad"))
             {
                 auto s = attributes["auto_pad"].s();
-                if(contains(attributes, "pads") and to_upper(s) != "NOTSET")
+                if(to_upper(s) != "NOTSET")
                 {
                     MIGRAPHX_THROW(
                         "PARSE_POOLING: auto_pad and padding cannot be specified simultaneously");
@@ -430,7 +430,17 @@ struct onnx_parser
             {
                 // insert zeros for pad op (args[0] has 4 dims)
                 padding = {0, 0, padding[0], padding[1], 0, 0, padding[2], padding[3]};
-                l0      = prog.add_instruction(op::pad{padding}, l0);
+                // MaxPool
+                if(ends_with(name, "MaxPool"))
+                {
+                    l0 = prog.add_instruction(
+                        op::pad{padding, std::numeric_limits<float>::lowest()}, l0);
+                }
+                // AveragePool
+                else
+                {
+                    l0 = prog.add_instruction(op::pad{padding}, l0);
+                }
             }
             else
             {
@@ -451,12 +461,6 @@ struct onnx_parser
         if(contains(attributes, "auto_pad"))
         {
             auto s = attributes["auto_pad"].s();
-            if(contains(attributes, "pads") and to_upper(s) != "NOTSET")
-            {
-                MIGRAPHX_THROW(
-                    "PARSE_POOLING: auto_pad and padding cannot be specified simultaneously");
-            }
-
             if(s.find("SAME") != std::string::npos)
             {
                 // calculate the padding
