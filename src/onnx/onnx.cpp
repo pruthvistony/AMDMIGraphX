@@ -1604,12 +1604,6 @@ struct onnx_parser
                     this->parse_node(input);
                 }
 
-                if(instructions.count(input) == 0)
-                {
-                    unsupported_nodes.push_back(input);
-                    MIGRAPHX_THROW("Node " + input + " is not supported!");
-                }
-
                 args.push_back(instructions.at(input));
             }
             std::vector<instruction_ref> result;
@@ -1916,7 +1910,7 @@ std::set<std::string> get_supported_ops()
         ops.insert(op.first);
     }
 
-    return std::move(ops);
+    return ops;
 }
 
 } // namespace MIGRAPHX_INLINE_NS
