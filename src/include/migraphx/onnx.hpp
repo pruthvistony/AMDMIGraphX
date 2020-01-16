@@ -18,6 +18,7 @@ struct onnx_options
 /// Create a program from an onnx file
 program parse_onnx(const std::string& name, onnx_options = onnx_options{});
 
+// program parse_model(const std::string& model_str, std::vector<std::string>& unsupported_nodes);
 program parse_model(const std::string& model_str, std::vector<std::string>& unsupported_nodes);
 
 std::set<std::string> get_supported_ops();
