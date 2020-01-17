@@ -1967,5 +1967,11 @@ std::set<std::string> get_supported_ops()
     return ops;
 }
 
+bool is_optype_supported(const std::string& op_type)
+{
+    static onnx_parser parser;
+    return (parser.ops.count(op_type) > 0);
+}
+
 } // namespace MIGRAPHX_INLINE_NS
 } // namespace migraphx

@@ -23,6 +23,8 @@ program parse_model(const std::string& model_str, std::vector<std::string>& unsu
 
 std::set<std::string> get_supported_ops();
 
+bool is_optype_supported(const std::string& op_type_name);
+
 } // namespace MIGRAPHX_INLINE_NS
 } // namespace migraphx
 
