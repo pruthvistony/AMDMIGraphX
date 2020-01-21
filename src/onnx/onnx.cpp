@@ -1607,7 +1607,7 @@ struct onnx_parser
         onnx::ModelProto model;
         try
         {
-            if(model.ParseFromString(model_str))
+            if(model.ParseFromArray(model_str.data(), static_cast<int>(model_str.size())))
             {
                 if(model.has_graph())
                 {
